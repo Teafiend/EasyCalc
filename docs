@@ -1,0 +1,10 @@
+Commands:
+	exit - quit program
+	variables - list all variables and their values
+	x (or any variable name) - print value of entered variable
+	arithmetic expression - print value of the expression
+
+Verbs:
+	let - perform an assignment, either variable or function
+		e.g. let x=2; let f(x,y)=x+y
+	
