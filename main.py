@@ -1,5 +1,15 @@
 #!/usr/bin/env python3
 
+def build_function(expression: str, arg_tuple: tuple):
+	def inner_function(*args):
+		# arg_tuple = (x, y)
+		# args = 3, 5
+		arg_mapping = {arg_tuple[i] : args[i] for i in range(len(arg_tuple))}
+		print(arg_mapping)
+		return eval(expression, globals(), arg_mapping)
+	
+	return inner_function
+	
 
 class Interpreter:
 	def __init__(self, n={}):
@@ -8,6 +18,7 @@ class Interpreter:
 	
 	def evaluate(self, expression: str):
 		super_tokens = expression.split(' ', 1)	
+		# TODO: does not correctly evaluate expressions with spaces
 		if len(super_tokens) == 1:
 			self.execute_command(super_tokens[0])
 		else:
@@ -20,7 +31,7 @@ class Interpreter:
 			for key, val in self.names.items():
 				print("{} = {}".format(key, val))
 		else:
-			print("Not a valid command")
+			print(eval(command, globals(), self.names))
 		
 	
 	def execute_operation(self, verb, statement):
@@ -37,9 +48,10 @@ class Interpreter:
 		else:
 			# super_tokens[0] is of form: func_name(arg1, arg2, ...)
 			tokens = super_tokens[0].rstrip(')').split('(')
-			name = tokens[0]
+			name = tokens[0] # maybe not needed
 			args = tuple(arg.strip() for arg in tokens[1].split(','))
-			
+			func = build_function(super_tokens[1], args)
+			self.names[name] = func
 
 def prompt(inter: Interpreter):
 	user_in = input("$ ")
