@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+
 def build_function(expression: str, arg_tuple: tuple):
 	def inner_function(*args):
 		# arg_tuple = (x, y)
@@ -7,7 +8,6 @@ def build_function(expression: str, arg_tuple: tuple):
 		arg_mapping = {arg_tuple[i] : args[i] for i in range(len(arg_tuple))}
 		print(arg_mapping)
 		return eval(expression, globals(), arg_mapping)
-	
 	return inner_function
 	
 
@@ -32,7 +32,6 @@ class Interpreter:
 				print("{} = {}".format(key, val))
 		else:
 			print(eval(command, globals(), self.names))
-		
 	
 	def execute_operation(self, verb, statement):
 		if verb == 'let':
@@ -53,16 +52,19 @@ class Interpreter:
 			func = build_function(super_tokens[1], args)
 			self.names[name] = func
 
+
 def prompt(inter: Interpreter):
 	user_in = input("$ ")
 	inter.evaluate(user_in)
 	return inter.done_interpreting
+
 
 def main():
 	inter = Interpreter()
 	done = False
 	while(not done):
 		done = prompt(inter)
+
 
 if __name__ == "__main__":
 	main()
