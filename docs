@@ -7,4 +7,5 @@ Commands:
 Verbs:
 	let - perform an assignment, either variable or function
 		e.g. let x=2; let f(x,y)=x+y
-	
+	integrate - integrate following expression (single variable)
+		e.g. integrate f from 0 to 10 over x

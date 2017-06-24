@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
+INTEGRAL_ITERATIONS = 1000000
 
 def build_function(expression: str, arg_tuple: tuple):
 	def inner_function(*args):
 		# arg_tuple = (x, y)
 		# args = 3, 5
 		arg_mapping = {arg_tuple[i] : args[i] for i in range(len(arg_tuple))}
-		print(arg_mapping)
 		return eval(expression, globals(), arg_mapping)
 	return inner_function
 	
@@ -36,8 +36,29 @@ class Interpreter:
 	def execute_operation(self, verb, statement):
 		if verb == 'let':
 			self.perform_assignment(statement)
+		elif verb == 'integrate':
+			value = self.integrate(statement)
+			# Ideally, truncate at 1/(square root of number of iterations)
+			print("{:.3f}".format(value))
 		else:
 			print("not an assignment")
+	
+	def integrate(self, statement):
+		tokens = statement.split()
+		# [0]=func, [1]=from, [2]=lower, [3]=to, [4]=upper, [5]=over, [6]=var
+		func = tokens[0]
+		lower = int(tokens[2])
+		upper = int(tokens[4])
+		var = tokens[6]
+		diff = upper - lower
+		delta = diff / INTEGRAL_ITERATIONS
+		mapping = {var: lower}
+		accum = 0
+		print("Integrating with delta-{} of {}...".format(var, delta))
+		while mapping[var] < upper:
+			accum += self.names[func](mapping[var]) * delta
+			mapping[var] += delta
+		return accum
 	
 	def perform_assignment(self, statement):
 		super_tokens = statement.split('=') # super_tokens[0] is name, [1] is value
