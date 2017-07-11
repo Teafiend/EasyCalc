@@ -76,7 +76,11 @@ class Interpreter:
 
 def prompt(inter: Interpreter):
 	user_in = input("$ ")
-	inter.evaluate(user_in)
+	try:
+		inter.evaluate(user_in)
+	except:
+		print("Invalid input")
+		prompt(inter)
 	return inter.done_interpreting
 
 
