@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 # TODO Add "help" command
+# TODO Allow user to input variables into function calls
 
 INTEGRAL_ITERATIONS = 1000000
 
@@ -12,27 +13,26 @@ class InvalidCommandError(Exception):
 class InvalidOperationError(Exception):
 	pass
 
+class MathExpression:
+	def __init__(self, expr_string="", args=tuple()):
+		self.expr = expr_string
+		self.arg_names = args
 	
+	def __call__(self, names, arg_values):
+		arg_mapping = {self.arg_names[i] : arg_values[i] \
+			for i in range(len(self.arg_names))}
+		arg_mapping.update(names)
+		return eval(self.expr, globals(), arg_mapping)
+
 
 class Interpreter:
 	def __init__(self, n={}):
 		self.names = n;
 		self.done_interpreting = False
 	
-	def build_function(self, expression: str, arg_tuple: tuple):
-		def inner_function(*args):
-			# arg_tuple = (x, y)
-			# args = 3, 5
-			arg_mapping = {arg_tuple[i] : args[i] for i in range(len(arg_tuple))}
-			# TODO Potential name conflict between args and global names; fix it
-			arg_mapping.update(self.names)
-			print(arg_mapping)
-			return eval(expression, globals(), arg_mapping)
-		return inner_function
-
 	def evaluate(self, expression: str):
 		super_tokens = expression.split(' ', 1)	
-		# TODO does not correctly evaluate expressions with spaces
+		# TODO does not correctly evaluate expressions with spaces; fix
 		if len(super_tokens) == 1:
 			self.execute_command(super_tokens[0])
 		else:
@@ -46,9 +46,19 @@ class Interpreter:
 			if DEBUG_MODE: 
 				print(self.names)
 			for key, val in self.names.items():
-				print("{} = {}".format(key, val))
-		elif command in self.names or command.split('(')[0] in self.names:
+				if callable(val):
+					formatted_args = ','.join(val.arg_names)
+					print("{}({}) = {}".format(key, formatted_args, val.expr))
+				else:
+					print("{} = {}".format(key, val))
+		elif command in self.names:
 			print(eval(command, globals(), self.names))
+		elif command.split('(')[0] in self.names:
+			# TODO Make this use regex instead of splitting on commas
+			arg_tokens = command.split('(')[1].rstrip(')').split(',')
+			print(arg_tokens)
+			arg_values = tuple((float(a) if '.' in a else int(a)) for a in arg_tokens)
+			print(self.names[command.split('(')[0]](self.names, arg_values))
 		else:
 			raise InvalidCommandError()
 	
@@ -92,9 +102,10 @@ class Interpreter:
 			# super_tokens[0] is of form: func_name(arg1, arg2, ...)
 			tokens = super_tokens[0].rstrip(')').split('(')
 			name = tokens[0] # maybe not needed
+			# TODO Split on a regex instead of commas; need to account for spaces
 			args = tuple(arg.strip() for arg in tokens[1].split(','))
-			func = self.build_function(super_tokens[1], args)
-			self.names[name] = func
+			expression = MathExpression(super_tokens[1], args)
+			self.names[name] = expression
 
 
 def prompt(inter: Interpreter):
